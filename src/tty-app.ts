@@ -8,8 +8,8 @@ import {
 import { loadHistoryEntries, saveHistoryEntries } from './history.js'
 import { parseLocalToolShortcut } from './local-tool-shortcuts.js'
 import {
-  PermissionDecision,
   PermissionManager,
+  PermissionPromptResult,
   PermissionRequest,
 } from './permissions.js'
 import { buildSystemPrompt } from './prompt.js'
@@ -18,6 +18,7 @@ import {
   clearScreen,
   enterAlternateScreen,
   exitAlternateScreen,
+  getPermissionPromptMaxScrollOffset,
   hideCursor,
   renderBanner,
   renderInputPrompt,
@@ -45,7 +46,12 @@ type TtyAppArgs = {
 
 type PendingApproval = {
   request: PermissionRequest
-  resolve: (decision: PermissionDecision) => void
+  resolve: (result: PermissionPromptResult) => void
+  detailsExpanded: boolean
+  detailsScrollOffset: number
+  selectedChoiceIndex: number
+  feedbackMode: boolean
+  feedbackInput: string
 }
 
 type ScreenState = {
@@ -103,6 +109,54 @@ function jumpTranscriptToEdge(
   }
 
   state.transcriptScrollOffset = nextOffset
+  return true
+}
+
+function getPendingApprovalMaxScrollOffset(state: ScreenState): number {
+  const pending = state.pendingApproval
+  if (!pending) return 0
+  return getPermissionPromptMaxScrollOffset(pending.request, {
+    expanded: pending.detailsExpanded,
+  })
+}
+
+function scrollPendingApprovalBy(state: ScreenState, delta: number): boolean {
+  const pending = state.pendingApproval
+  if (!pending || !pending.detailsExpanded) {
+    return false
+  }
+
+  const maxOffset = getPendingApprovalMaxScrollOffset(state)
+  const nextOffset = Math.max(
+    0,
+    Math.min(maxOffset, pending.detailsScrollOffset + delta),
+  )
+  if (nextOffset === pending.detailsScrollOffset) {
+    return false
+  }
+  pending.detailsScrollOffset = nextOffset
+  return true
+}
+
+function togglePendingApprovalExpand(state: ScreenState): boolean {
+  const pending = state.pendingApproval
+  if (!pending || pending.request.kind !== 'edit') {
+    return false
+  }
+  pending.detailsExpanded = !pending.detailsExpanded
+  pending.detailsScrollOffset = 0
+  return true
+}
+
+function movePendingApprovalSelection(state: ScreenState, delta: number): boolean {
+  const pending = state.pendingApproval
+  if (!pending || pending.feedbackMode) {
+    return false
+  }
+  const total = pending.request.choices.length
+  if (total <= 0) return false
+  pending.selectedChoiceIndex =
+    (pending.selectedChoiceIndex + delta + total) % total
   return true
 }
 
@@ -167,18 +221,150 @@ function updateToolEntry(
 
   entry.status = status
   entry.body = body
+  entry.collapsed = false
+  entry.collapsedSummary = undefined
+  entry.collapsePhase = undefined
 }
 
-function summarizeToolInput(input: unknown): string {
+function setToolEntryCollapsePhase(
+  state: ScreenState,
+  entryId: number,
+  phase: 1 | 2 | 3,
+): void {
+  const entry = state.transcript.find(
+    item => item.id === entryId && item.kind === 'tool',
+  )
+  if (!entry || entry.kind !== 'tool' || entry.status === 'running') {
+    return
+  }
+  entry.collapsePhase = phase
+}
+
+function collapseToolEntry(
+  state: ScreenState,
+  entryId: number,
+  summary: string,
+): void {
+  const entry = state.transcript.find(
+    item => item.id === entryId && item.kind === 'tool',
+  )
+  if (!entry || entry.kind !== 'tool' || entry.status === 'running') {
+    return
+  }
+  entry.collapsePhase = undefined
+  entry.collapsed = true
+  entry.collapsedSummary = summary
+}
+
+function summarizeCollapsedToolBody(output: string): string {
+  const line = output
+    .split('\n')
+    .map(item => item.trim())
+    .find(Boolean)
+  if (!line) {
+    return 'output collapsed'
+  }
+  if (line.length > 140) {
+    return `${line.slice(0, 140)}...`
+  }
+  return line
+}
+
+function scheduleToolAutoCollapse(
+  state: ScreenState,
+  entryId: number,
+  output: string,
+  rerender: () => void,
+): void {
+  const summary = summarizeCollapsedToolBody(output)
+  const frames: Array<1 | 2 | 3> = [1, 2]
+  frames.forEach((phase, idx) => {
+    setTimeout(() => {
+      setToolEntryCollapsePhase(state, entryId, phase)
+      rerender()
+    }, 110 * (idx + 1))
+  })
+  setTimeout(() => {
+    collapseToolEntry(state, entryId, summary)
+    rerender()
+  }, 320)
+}
+
+function truncateForDisplay(text: string, max = 180): string {
+  if (text.length <= max) return text
+  return `${text.slice(0, max)}...`
+}
+
+function summarizeToolInput(toolName: string, input: unknown): string {
   if (typeof input === 'string') {
-    return input
+    return truncateForDisplay(input.replace(/\s+/g, ' ').trim())
+  }
+
+  if (typeof input === 'object' && input !== null) {
+    const maybePath = (input as { path?: unknown }).path
+    const pathPart =
+      typeof maybePath === 'string' && maybePath.trim()
+        ? ` path=${maybePath}`
+        : ''
+
+    if (toolName === 'patch_file') {
+      const count = Array.isArray((input as { replacements?: unknown }).replacements)
+        ? (input as { replacements: unknown[] }).replacements.length
+        : 0
+      return `patch_file${pathPart} replacements=${count}`
+    }
+
+    if (toolName === 'edit_file') {
+      return `edit_file${pathPart}`
+    }
+
+    if (toolName === 'read_file') {
+      const offset = (input as { offset?: unknown }).offset
+      const limit = (input as { limit?: unknown }).limit
+      return `read_file${pathPart}${offset !== undefined ? ` offset=${String(offset)}` : ''}${limit !== undefined ? ` limit=${String(limit)}` : ''}`
+    }
+
+    if (toolName === 'run_command') {
+      const command = (input as { command?: unknown }).command
+      return `run_command${typeof command === 'string' ? ` ${truncateForDisplay(command, 120)}` : ''}`
+    }
   }
 
   try {
-    return JSON.stringify(input, null, 2)
+    return truncateForDisplay(JSON.stringify(input))
   } catch {
-    return String(input)
+    return truncateForDisplay(String(input))
   }
+}
+
+type AggregatedEditProgress = {
+  entryId: number
+  toolName: string
+  path: string
+  total: number
+  completed: number
+  errors: number
+  lastOutput: string
+}
+
+function isFileEditTool(toolName: string): boolean {
+  return (
+    toolName === 'edit_file' ||
+    toolName === 'patch_file' ||
+    toolName === 'modify_file' ||
+    toolName === 'write_file'
+  )
+}
+
+function extractPathFromToolInput(input: unknown): string | null {
+  if (typeof input !== 'object' || input === null) {
+    return null
+  }
+  if (!('path' in input)) {
+    return null
+  }
+  const value = (input as { path?: unknown }).path
+  return typeof value === 'string' && value.trim() ? value : null
 }
 
 function renderScreen(args: TtyAppArgs, state: ScreenState): void {
@@ -187,6 +373,23 @@ function renderScreen(args: TtyAppArgs, state: ScreenState): void {
     renderBanner(args.runtime, args.cwd, args.permissions.getSummary()),
   )
   console.log('')
+
+  if (state.pendingApproval) {
+    console.log(
+      renderPermissionPrompt(state.pendingApproval.request, {
+        expanded: state.pendingApproval.detailsExpanded,
+        scrollOffset: state.pendingApproval.detailsScrollOffset,
+        selectedChoiceIndex: state.pendingApproval.selectedChoiceIndex,
+        feedbackMode: state.pendingApproval.feedbackMode,
+        feedbackInput: state.pendingApproval.feedbackInput,
+      }),
+    )
+    console.log('')
+    console.log(renderToolPanel(state.activeTool, state.recentTools))
+    console.log('')
+    console.log(renderStatusLine(state.status))
+    return
+  }
 
   if (state.transcript.length > 0) {
     console.log(renderTranscript(state.transcript, state.transcriptScrollOffset))
@@ -204,11 +407,6 @@ function renderScreen(args: TtyAppArgs, state: ScreenState): void {
         Math.min(state.selectedSlashIndex, commands.length - 1),
       ),
     )
-  }
-
-  if (state.pendingApproval) {
-    console.log('')
-    console.log(renderPermissionPrompt(state.pendingApproval.request))
   }
 
   console.log('')
@@ -237,7 +435,7 @@ async function executeToolShortcut(
     kind: 'tool',
     toolName,
     status: 'running',
-    body: summarizeToolInput(input),
+    body: summarizeToolInput(toolName, input),
   })
   rerender()
 
@@ -256,6 +454,13 @@ async function executeToolShortcut(
     result.ok ? 'success' : 'error',
     result.ok ? result.output : `ERROR: ${result.output}`,
   )
+  collapseToolEntry(
+    state,
+    entryId,
+    summarizeCollapsedToolBody(
+      result.ok ? result.output : `ERROR: ${result.output}`,
+    ),
+  )
   state.activeTool = null
   state.status = null
   state.transcriptScrollOffset = 0
@@ -265,8 +470,9 @@ async function handleInput(
   args: TtyAppArgs,
   state: ScreenState,
   rerender: () => void,
+  submittedRawInput?: string,
 ): Promise<boolean> {
-  const input = state.input.trim()
+  const input = (submittedRawInput ?? state.input).trim()
   if (!input) return false
   if (input === '/exit') return true
 
@@ -332,7 +538,10 @@ async function handleInput(
   rerender()
 
   const pendingToolEntries = new Map<string, number[]>()
+  const aggregatedEditByKey = new Map<string, AggregatedEditProgress>()
+  const aggregatedEditByEntryId = new Map<number, AggregatedEditProgress>()
 
+  args.permissions.beginTurn()
   try {
     const nextMessages = await runAgentTurn({
       model: args.model,
@@ -352,12 +561,50 @@ async function handleInput(
       onToolStart(toolName, toolInput) {
         state.status = `Running ${toolName}...`
         state.activeTool = toolName
-        const entryId = pushTranscriptEntry(state, {
-          kind: 'tool',
-          toolName,
-          status: 'running',
-          body: summarizeToolInput(toolInput),
-        })
+        let entryId: number
+        const targetPath = extractPathFromToolInput(toolInput)
+        const canAggregate = isFileEditTool(toolName) && targetPath !== null
+
+        if (canAggregate) {
+          const key = `${toolName}:${targetPath}`
+          const existing = aggregatedEditByKey.get(key)
+          if (existing) {
+            existing.total += 1
+            existing.lastOutput = summarizeToolInput(toolName, toolInput)
+            entryId = existing.entryId
+            updateToolEntry(
+              state,
+              entryId,
+              existing.errors > 0 ? 'error' : 'running',
+              `Aggregated ${toolName} for ${targetPath}\nCompleted: ${existing.completed}/${existing.total}`,
+            )
+          } else {
+            entryId = pushTranscriptEntry(state, {
+              kind: 'tool',
+              toolName,
+              status: 'running',
+              body: summarizeToolInput(toolName, toolInput),
+            })
+            const progress: AggregatedEditProgress = {
+              entryId,
+              toolName,
+              path: targetPath,
+              total: 1,
+              completed: 0,
+              errors: 0,
+              lastOutput: summarizeToolInput(toolName, toolInput),
+            }
+            aggregatedEditByKey.set(key, progress)
+            aggregatedEditByEntryId.set(entryId, progress)
+          }
+        } else {
+          entryId = pushTranscriptEntry(state, {
+            kind: 'tool',
+            toolName,
+            status: 'running',
+            body: summarizeToolInput(toolName, toolInput),
+          })
+        }
         const pending = pendingToolEntries.get(toolName) ?? []
         pending.push(entryId)
         pendingToolEntries.set(toolName, pending)
@@ -365,20 +612,70 @@ async function handleInput(
         rerender()
       },
       onToolResult(toolName, output, isError) {
-        state.recentTools.push({
-          name: toolName,
-          status: isError ? 'error' : 'success',
-        })
         const pending = pendingToolEntries.get(toolName) ?? []
         const entryId = pending.shift()
         pendingToolEntries.set(toolName, pending)
         if (entryId !== undefined) {
-          updateToolEntry(
-            state,
-            entryId,
-            isError ? 'error' : 'success',
-            isError ? `ERROR: ${output}` : output,
-          )
+          const aggregated = aggregatedEditByEntryId.get(entryId)
+          if (aggregated && aggregated.toolName === toolName) {
+            aggregated.completed += 1
+            if (isError) {
+              aggregated.errors += 1
+            }
+            aggregated.lastOutput = output
+            const done = aggregated.completed >= aggregated.total
+            if (done) {
+              state.recentTools.push({
+                name: `${toolName} x${aggregated.total}`,
+                status: aggregated.errors > 0 ? 'error' : 'success',
+              })
+            }
+            const aggregatedBody = done
+              ? [
+                  `Aggregated ${toolName} for ${aggregated.path}`,
+                  `Operations: ${aggregated.total}, errors: ${aggregated.errors}`,
+                  `Last result: ${aggregated.lastOutput}`,
+                ].join('\n')
+              : `Aggregated ${toolName} for ${aggregated.path}\nCompleted: ${aggregated.completed}/${aggregated.total}`
+            updateToolEntry(
+              state,
+              entryId,
+              aggregated.errors > 0 ? 'error' : done ? 'success' : 'running',
+              aggregatedBody,
+            )
+            if (done) {
+              collapseToolEntry(
+                state,
+                entryId,
+                summarizeCollapsedToolBody(aggregatedBody),
+              )
+              aggregatedEditByEntryId.delete(entryId)
+              aggregatedEditByKey.delete(`${toolName}:${aggregated.path}`)
+            }
+          } else {
+            state.recentTools.push({
+              name: toolName,
+              status: isError ? 'error' : 'success',
+            })
+            updateToolEntry(
+              state,
+              entryId,
+              isError ? 'error' : 'success',
+              isError ? `ERROR: ${output}` : output,
+            )
+            collapseToolEntry(
+              state,
+              entryId,
+              summarizeCollapsedToolBody(
+                isError ? `ERROR: ${output}` : output,
+              ),
+            )
+          }
+        } else {
+          state.recentTools.push({
+            name: toolName,
+            status: isError ? 'error' : 'success',
+          })
         }
         state.activeTool = null
         state.status = 'Thinking...'
@@ -398,6 +695,8 @@ async function handleInput(
       body: `请求失败: ${message}`,
     })
     state.transcriptScrollOffset = 0
+  } finally {
+    args.permissions.endTurn()
   }
 
   state.status = null
@@ -407,10 +706,18 @@ async function handleInput(
 function createPermissionPromptHandler(
   state: ScreenState,
   rerender: () => void,
-): (request: PermissionRequest) => Promise<PermissionDecision> {
+): (request: PermissionRequest) => Promise<PermissionPromptResult> {
   return request =>
     new Promise(resolve => {
-      state.pendingApproval = { request, resolve }
+      state.pendingApproval = {
+        request,
+        resolve,
+        detailsExpanded: false,
+        detailsScrollOffset: 0,
+        selectedChoiceIndex: 0,
+        feedbackMode: false,
+        feedbackInput: '',
+      }
       state.status = 'Waiting for approval...'
       rerender()
     })
@@ -479,25 +786,135 @@ export async function runTtyApp(args: TtyAppArgs): Promise<void> {
     const handleEvent = async (event: ParsedInputEvent) => {
       try {
         if (state.pendingApproval) {
-          const keyChar = event.kind === 'text' && !event.ctrl && !event.meta ? event.text : ''
-          const choice = state.pendingApproval.request.choices.find(
-            item => item.key === keyChar,
-          )
+          if (event.kind === 'text' && event.ctrl && event.text === 'o') {
+            if (togglePendingApprovalExpand(state)) {
+              renderScreen(permissionArgs, state)
+            }
+            return
+          }
 
-          if (choice) {
+          if (event.kind === 'wheel') {
+            if (
+              event.direction === 'up'
+                ? scrollPendingApprovalBy(state, -3)
+                : scrollPendingApprovalBy(state, 3)
+            ) {
+              renderScreen(permissionArgs, state)
+            }
+            return
+          }
+
+          if (event.kind === 'key' && event.name === 'pageup') {
+            if (scrollPendingApprovalBy(state, -8)) {
+              renderScreen(permissionArgs, state)
+            }
+            return
+          }
+
+          if (event.kind === 'key' && event.name === 'pagedown') {
+            if (scrollPendingApprovalBy(state, 8)) {
+              renderScreen(permissionArgs, state)
+            }
+            return
+          }
+
+          if (event.kind === 'key' && event.name === 'up' && event.meta) {
+            if (scrollPendingApprovalBy(state, -1)) {
+              renderScreen(permissionArgs, state)
+            }
+            return
+          }
+
+          if (event.kind === 'key' && event.name === 'down' && event.meta) {
+            if (scrollPendingApprovalBy(state, 1)) {
+              renderScreen(permissionArgs, state)
+            }
+            return
+          }
+
+          if (event.kind === 'key' && event.name === 'up' && !event.meta) {
+            if (movePendingApprovalSelection(state, -1)) {
+              renderScreen(permissionArgs, state)
+            }
+            return
+          }
+
+          if (event.kind === 'key' && event.name === 'down' && !event.meta) {
+            if (movePendingApprovalSelection(state, 1)) {
+              renderScreen(permissionArgs, state)
+            }
+            return
+          }
+
+          if (event.kind === 'key' && event.name === 'backspace') {
             const pending = state.pendingApproval
+            if (pending.feedbackMode && pending.feedbackInput.length > 0) {
+              pending.feedbackInput = pending.feedbackInput.slice(0, -1)
+              renderScreen(permissionArgs, state)
+            }
+            return
+          }
+
+          if (event.kind === 'text' && !event.ctrl && !event.meta) {
+            const pending = state.pendingApproval
+            if (pending.feedbackMode) {
+              pending.feedbackInput += event.text
+              renderScreen(permissionArgs, state)
+            }
+            return
+          }
+
+          if (event.kind === 'key' && event.name === 'return') {
+            const pending = state.pendingApproval
+            if (pending.feedbackMode) {
+              const feedback = pending.feedbackInput.trim()
+              state.pendingApproval = null
+              state.status = null
+              pending.resolve({
+                decision: 'deny_with_feedback',
+                feedback,
+              })
+              renderScreen(permissionArgs, state)
+              return
+            }
+
+            const selected =
+              pending.request.choices[
+                Math.min(
+                  pending.selectedChoiceIndex,
+                  pending.request.choices.length - 1,
+                )
+              ]
+            if (!selected) {
+              return
+            }
+
+            if (selected.decision === 'deny_with_feedback') {
+              pending.feedbackMode = true
+              pending.feedbackInput = ''
+              renderScreen(permissionArgs, state)
+              return
+            }
+
             state.pendingApproval = null
             state.status = null
-            pending.resolve(choice.decision)
+            pending.resolve({ decision: selected.decision })
             renderScreen(permissionArgs, state)
             return
           }
 
-          if (event.kind === 'key' && (event.name === 'escape' || event.name === 'return')) {
+          if (event.kind === 'key' && event.name === 'escape') {
             const pending = state.pendingApproval
+            if (pending.feedbackMode) {
+              pending.feedbackMode = false
+              pending.feedbackInput = ''
+              renderScreen(permissionArgs, state)
+              return
+            }
+
             state.pendingApproval = null
             state.status = null
-            pending.resolve('deny_once')
+            pending.resolve({ decision: 'deny_once' })
             renderScreen(permissionArgs, state)
             return
           }
@@ -538,14 +955,17 @@ export async function runTtyApp(args: TtyAppArgs): Promise<void> {
             }
           }
 
+          const submittedInput = state.input
+          state.input = ''
+          state.cursorOffset = 0
+          state.selectedSlashIndex = 0
+          renderScreen(permissionArgs, state)
           const shouldExit = await handleInput(
             permissionArgs,
             state,
             () => renderScreen(permissionArgs, state),
+            submittedInput,
           )
-          state.input = ''
-          state.cursorOffset = 0
-          state.selectedSlashIndex = 0
           if (shouldExit) {
             finish()
             return

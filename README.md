@@ -66,6 +66,15 @@ MiniCode is a good fit if you want:
 - local installer with independent config storage
 - support for Anthropic-style API endpoints
 
+### Recent interaction upgrades
+
+- approval prompts now use Up/Down selection with Enter confirm
+- supports "reject with guidance" to send corrective instructions back to the model
+- edit approvals support "allow this file for this turn" and "allow all edits for this turn"
+- file review now uses standard unified diff output (closer to `git diff`)
+- approval view supports `Ctrl+O` expand/collapse plus wheel/page scrolling
+- finished tool calls auto-collapse into concise summaries to reduce transcript noise
+
 ## Installation
 
 ```bash
@@ -131,6 +140,7 @@ MINI_CODE_MODEL_MODE=mock npm run dev
 - transcript scrolling
 - prompt editing
 - input history navigation
+- approval selection and feedback input flow
 
 ## Configuration
 

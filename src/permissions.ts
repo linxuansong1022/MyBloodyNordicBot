@@ -5,13 +5,21 @@ import { MINI_CODE_DIR } from './config.js'
 export type PermissionDecision =
   | 'allow_once'
   | 'allow_always'
+  | 'allow_turn'
+  | 'allow_all_turn'
   | 'deny_once'
   | 'deny_always'
+  | 'deny_with_feedback'
 
 export type PermissionChoice = {
   key: string
   label: string
   decision: PermissionDecision
+}
+
+export type PermissionPromptResult = {
+  decision: PermissionDecision
+  feedback?: string
 }
 
 export type PermissionRequest = {
@@ -24,7 +32,7 @@ export type PermissionRequest = {
 
 export type PermissionPromptHandler = (
   request: PermissionRequest,
-) => Promise<PermissionDecision>
+) => Promise<PermissionPromptResult>
 
 type PermissionStore = {
   allowedDirectoryPrefixes?: string[]
@@ -155,6 +163,8 @@ export class PermissionManager {
   private readonly deniedEditPatterns = new Set<string>()
   private readonly sessionAllowedEdits = new Set<string>()
   private readonly sessionDeniedEdits = new Set<string>()
+  private readonly turnAllowedEdits = new Set<string>()
+  private turnAllowAllEdits = false
   private ready: Promise<void>
 
   constructor(
@@ -194,6 +204,16 @@ export class PermissionManager {
 
   async whenReady(): Promise<void> {
     await this.ready
+  }
+
+  beginTurn(): void {
+    this.turnAllowedEdits.clear()
+    this.turnAllowAllEdits = false
+  }
+
+  endTurn(): void {
+    this.turnAllowedEdits.clear()
+    this.turnAllowAllEdits = false
   }
 
   getSummary(): string[] {
@@ -268,7 +288,7 @@ export class PermissionManager {
         ? normalizedTarget
         : path.dirname(normalizedTarget)
 
-    const decision = await this.prompt({
+    const promptResult = await this.prompt({
       kind: 'path',
       summary: `mini-code wants ${intent.replace('_', ' ')} access outside the current cwd`,
       details: [
@@ -285,18 +305,18 @@ export class PermissionManager {
       ],
     })
 
-    if (decision === 'allow_once') {
+    if (promptResult.decision === 'allow_once') {
       this.sessionAllowedPaths.add(normalizedTarget)
       return
     }
 
-    if (decision === 'allow_always') {
+    if (promptResult.decision === 'allow_always') {
       this.allowedDirectoryPrefixes.add(scopeDirectory)
       await this.persist()
       return
     }
 
-    if (decision === 'deny_always') {
+    if (promptResult.decision === 'deny_always') {
       this.deniedDirectoryPrefixes.add(scopeDirectory)
       await this.persist()
     } else {
@@ -341,7 +361,7 @@ export class PermissionManager {
       )
     }
 
-    const decision = await this.prompt({
+    const promptResult = await this.prompt({
       kind: 'command',
       summary: 'mini-code wants to run a dangerous command',
       details: [
@@ -358,18 +378,18 @@ export class PermissionManager {
       ],
     })
 
-    if (decision === 'allow_once') {
+    if (promptResult.decision === 'allow_once') {
       this.sessionAllowedCommands.add(signature)
       return
     }
 
-    if (decision === 'allow_always') {
+    if (promptResult.decision === 'allow_always') {
       this.allowedCommandPatterns.add(signature)
       await this.persist()
       return
     }
 
-    if (decision === 'deny_always') {
+    if (promptResult.decision === 'deny_always') {
       this.deniedCommandPatterns.add(signature)
       await this.persist()
     } else {
@@ -393,6 +413,8 @@ export class PermissionManager {
 
     if (
       this.sessionAllowedEdits.has(normalizedTarget) ||
+      this.turnAllowedEdits.has(normalizedTarget) ||
+      this.turnAllowAllEdits ||
       this.allowedEditPatterns.has(normalizedTarget)
     ) {
       return
@@ -404,41 +426,59 @@ export class PermissionManager {
       )
     }
 
-    const previewLines = diffPreview.split('\n')
-    const truncatedPreview =
-      previewLines.length > 60
-        ? [...previewLines.slice(0, 60), `... (${previewLines.length - 60} more line(s))`].join('\n')
-        : diffPreview
-
-    const decision = await this.prompt({
+    const promptResult = await this.prompt({
       kind: 'edit',
       summary: 'mini-code wants to apply a file modification',
       details: [
         `target: ${normalizedTarget}`,
         '',
-        truncatedPreview,
+        diffPreview,
       ],
       scope: normalizedTarget,
       choices: [
-        { key: 'y', label: 'apply once', decision: 'allow_once' },
-        { key: 'a', label: 'always allow this file', decision: 'allow_always' },
-        { key: 'n', label: 'reject once', decision: 'deny_once' },
-        { key: 'd', label: 'always reject this file', decision: 'deny_always' },
+        { key: '1', label: 'apply once', decision: 'allow_once' },
+        { key: '2', label: 'allow this file in this turn', decision: 'allow_turn' },
+        { key: '3', label: 'allow all edits in this turn', decision: 'allow_all_turn' },
+        { key: '4', label: 'always allow this file', decision: 'allow_always' },
+        { key: '5', label: 'reject once', decision: 'deny_once' },
+        { key: '6', label: 'reject and send guidance to model', decision: 'deny_with_feedback' },
+        { key: '7', label: 'always reject this file', decision: 'deny_always' },
       ],
     })
 
-    if (decision === 'allow_once') {
+    if (promptResult.decision === 'allow_once') {
       this.sessionAllowedEdits.add(normalizedTarget)
       return
     }
 
-    if (decision === 'allow_always') {
+    if (promptResult.decision === 'allow_turn') {
+      this.turnAllowedEdits.add(normalizedTarget)
+      return
+    }
+
+    if (promptResult.decision === 'allow_all_turn') {
+      this.turnAllowAllEdits = true
+      return
+    }
+
+    if (promptResult.decision === 'allow_always') {
       this.allowedEditPatterns.add(normalizedTarget)
       await this.persist()
       return
     }
 
-    if (decision === 'deny_always') {
+    if (promptResult.decision === 'deny_with_feedback') {
+      const guidance = promptResult.feedback?.trim()
+      if (guidance) {
+        throw new Error(
+          `Edit denied: ${normalizedTarget}\nUser guidance: ${guidance}`,
+        )
+      }
+      this.sessionDeniedEdits.add(normalizedTarget)
+      throw new Error(`Edit denied: ${normalizedTarget}`)
+    }
+
+    if (promptResult.decision === 'deny_always') {
       this.deniedEditPatterns.add(normalizedTarget)
       await this.persist()
     } else {

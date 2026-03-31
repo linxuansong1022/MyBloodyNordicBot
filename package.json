@@ -12,6 +12,7 @@
     "install-local": "tsx src/install.ts"
   },
   "dependencies": {
+    "diff": "^8.0.4",
     "zod": "^4.1.5"
   },
   "devDependencies": {

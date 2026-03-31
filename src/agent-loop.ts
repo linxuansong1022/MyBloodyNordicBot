@@ -2,52 +2,6 @@ import type { ToolRegistry } from './tool.js'
 import type { ChatMessage, ModelAdapter } from './types.js'
 import type { PermissionManager } from './permissions.js'
 
-function isUserTextMessage(
-  message: ChatMessage,
-): message is Extract<ChatMessage, { role: 'user' }> {
-  return message.role === 'user'
-}
-
-function userRequestedAction(messages: ChatMessage[]): boolean {
-  const lastUser = [...messages]
-    .reverse()
-    .find(
-      (message): message is Extract<ChatMessage, { role: 'user' }> =>
-        isUserTextMessage(message) &&
-        !message.content.startsWith('Continue immediately with tool use.'),
-    )
-
-  if (!lastUser) return false
-
-  const text = lastUser.content.trim().toLowerCase()
-  if (!text) return false
-
-  const actionHints = [
-    '改',
-    '修改',
-    '优化',
-    '生成',
-    '创建',
-    '实现',
-    '完善',
-    '修复',
-    '做一个',
-    '写一个',
-    'build',
-    'create',
-    'edit',
-    'update',
-    'modify',
-    'fix',
-    'implement',
-    'improve',
-    'optimize',
-    'generate',
-  ]
-
-  return actionHints.some(hint => text.includes(hint))
-}
-
 function looksLikeClarifyingQuestion(content: string): boolean {
   const trimmed = content.trim()
   if (!trimmed) return false
@@ -99,78 +53,6 @@ function looksLikeClarifyingQuestion(content: string): boolean {
   )
 }
 
-function shouldAutoContinueAssistant(content: string): boolean {
-  const trimmed = content.trim()
-  if (!trimmed) return false
-
-  const lower = trimmed.toLowerCase()
-  const starters = [
-    "let me ",
-    "i'll ",
-    'i will ',
-    'next, ',
-    'now i will ',
-    '我来',
-    '让我',
-    '接下来我会',
-    '现在我来',
-    '我先',
-  ]
-
-  const actionHints = [
-    '优化',
-    '修改',
-    '创建',
-    '检查',
-    'read',
-    'inspect',
-    'update',
-    'modify',
-    'optimize',
-    'create',
-    'fix',
-  ]
-
-  const planHints = [
-    '我会',
-    '我将',
-    '计划',
-    '步骤',
-    '接下来',
-    '然后',
-    'let me',
-    "i'll",
-    'i will',
-    'plan',
-    'steps',
-    'next',
-    'then',
-  ]
-
-  const hasNumberedPlan =
-    /^\s*1\.\s+/m.test(trimmed) ||
-    /^\s*-\s+/m.test(trimmed) ||
-    /^\s*•\s+/m.test(trimmed)
-
-  const looksLikePreface =
-    trimmed.endsWith(':') ||
-    trimmed.endsWith('：') ||
-    starters.some(prefix => lower.startsWith(prefix) || trimmed.startsWith(prefix))
-
-  const looksLikePlan =
-    hasNumberedPlan || planHints.some(hint => lower.includes(hint) || trimmed.includes(hint))
-
-  if (looksLikeClarifyingQuestion(trimmed)) {
-    return false
-  }
-
-  if (!looksLikePreface && !looksLikePlan) {
-    return false
-  }
-
-  return actionHints.some(hint => lower.includes(hint) || trimmed.includes(hint))
-}
-
 export async function runAgentTurn(args: {
   model: ModelAdapter
   tools: ToolRegistry
@@ -184,7 +66,6 @@ export async function runAgentTurn(args: {
 }): Promise<ChatMessage[]> {
   const maxSteps = args.maxSteps ?? 6
   let messages = args.messages
-  let autoContinueCount = 0
 
   for (let step = 0; step < maxSteps; step++) {
     const next = await args.model.next(messages)
@@ -199,23 +80,6 @@ export async function runAgentTurn(args: {
         ...messages,
         assistantMessage,
       ]
-
-      if (
-        autoContinueCount < 2 &&
-        userRequestedAction(messages) &&
-        shouldAutoContinueAssistant(next.content)
-      ) {
-        autoContinueCount += 1
-        messages = [
-          ...withAssistant,
-          <ChatMessage>{
-            role: 'user',
-            content:
-              'Continue immediately with tool use. The user asked you to act, so do not stop at a preface, plan, or recommendation list. Inspect files, edit files, run tools, and only summarize after you have actually started the work.',
-          },
-        ]
-        continue
-      }
 
       return withAssistant
     }

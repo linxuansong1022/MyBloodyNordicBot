@@ -66,6 +66,15 @@ MiniCode 围绕一个实用的 terminal-first agent loop 构建：
 - 独立配置目录和交互式安装器
 - 支持 Anthropic 风格接口
 
+### 最近交互改进
+
+- 审批对话支持上下键选择与 Enter 确认（不再依赖字母键）
+- 支持“拒绝并给模型反馈”，可直接把修正建议发回模型
+- 编辑审批支持“本轮允许此文件”与“本轮允许全部编辑”
+- diff 预览改为标准 unified diff（更接近 `git diff`）
+- 审批页面支持 `Ctrl+O` 展开/收起与滚轮/分页滚动
+- 工具调用结果自动折叠为摘要，减少 transcript 噪音
+
 ## 安装
 
 ```bash
@@ -131,6 +140,7 @@ MINI_CODE_MODEL_MODE=mock npm run dev
 - transcript 滚动
 - 输入编辑
 - 历史输入导航
+- 审批界面上下键选择与反馈输入
 
 ## 配置
 
