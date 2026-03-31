@@ -1,22 +1,70 @@
 # MiniCode
 
-[简体中文](./README.zh-CN.md)
+[简体中文](./README.zh-CN.md) | [Architecture](./ARCHITECTURE.md) | [License](./LICENSE)
 
-MiniCode is a lightweight terminal coding assistant for local development workflows.
+A lightweight terminal coding assistant for local development workflows.
 
-It focuses on a compact tool loop, practical file operations, and a simple full-screen CLI experience.
+MiniCode provides Claude Code-like workflow and architectural ideas in a much smaller implementation, making it especially useful for learning, experimentation, and custom tooling.
 
-One of its main advantages is that it provides Claude Code-like capabilities and architectural ideas in a much lighter implementation, which makes it especially suitable for learning and experimentation.
+## Overview
 
-## Highlights
+MiniCode is built around a practical terminal-first agent loop:
 
-- Tool-driven coding loop with multi-step execution in a single turn
-- File reading, searching, writing, patching, and command execution
-- Review-before-write flow for file modifications
-- Interactive installer with local configuration storage
-- Full-screen terminal UI with command menu, transcript view, and history
-- Compatible with Anthropic-style API endpoints
-- A lightweight way to study Claude Code-like workflows and architecture
+- accept a user request
+- inspect the workspace
+- call tools when needed
+- review file changes before writing
+- return a final response in the same terminal session
+
+The project is intentionally compact, so the control flow, tool model, and TUI behavior remain easy to understand and extend.
+
+## Table of Contents
+
+- [Why MiniCode](#why-minicode)
+- [Features](#features)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Commands](#commands)
+- [Configuration](#configuration)
+- [Project Structure](#project-structure)
+- [Architecture Docs](#architecture-docs)
+- [Development](#development)
+
+## Why MiniCode
+
+MiniCode is a good fit if you want:
+
+- a lightweight coding assistant instead of a large platform
+- a terminal UI with tool calling, transcript, and command workflow
+- a small codebase that is suitable for study and modification
+- a reference implementation for Claude Code-like agent architecture
+
+## Features
+
+### Core workflow
+
+- multi-step tool execution in a single turn
+- model -> tool -> model loop
+- full-screen terminal interface
+- input history, transcript scrolling, and slash command menu
+
+### Built-in tools
+
+- `list_files`
+- `grep_files`
+- `read_file`
+- `write_file`
+- `edit_file`
+- `patch_file`
+- `modify_file`
+- `run_command`
+
+### Safety and usability
+
+- review-before-write flow for file modifications
+- path and command permission checks
+- local installer with independent config storage
+- support for Anthropic-style API endpoints
 
 ## Installation
 
@@ -32,11 +80,11 @@ The installer will ask for:
 - `ANTHROPIC_BASE_URL`
 - `ANTHROPIC_AUTH_TOKEN`
 
-It stores configuration in:
+Configuration is stored in:
 
 - `~/.mini-code/settings.json`
 
-It also installs a launcher to:
+The launcher is installed to:
 
 - `~/.local/bin/minicode`
 
@@ -48,36 +96,27 @@ export PATH="$HOME/.local/bin:$PATH"
 
 ## Quick Start
 
+Run the installed launcher:
+
 ```bash
 minicode
 ```
 
-For local development:
+Run in development mode:
 
 ```bash
 npm run dev
 ```
 
-For offline demo mode:
+Run in offline demo mode:
 
 ```bash
 MINI_CODE_MODEL_MODE=mock npm run dev
 ```
 
-## Built-in Tools
+## Commands
 
-- `list_files`
-- `grep_files`
-- `read_file`
-- `write_file`
-- `edit_file`
-- `patch_file`
-- `modify_file`
-- `run_command`
-
-MiniCode can inspect files, apply edits, and run verification commands inside a terminal workflow.
-
-## Local Commands
+### Local slash commands
 
 - `/help`
 - `/tools`
@@ -86,7 +125,12 @@ MiniCode can inspect files, apply edits, and run verification commands inside a 
 - `/model <name>`
 - `/config-paths`
 
-The CLI also supports command suggestions, transcript scrolling, prompt editing, and input history.
+### Terminal interaction
+
+- command suggestions and slash menu
+- transcript scrolling
+- prompt editing
+- input history navigation
 
 ## Configuration
 
@@ -119,10 +163,10 @@ Configuration priority:
 - `src/config.ts`: runtime configuration loading
 - `src/install.ts`: interactive installer
 
-## Architecture
+## Architecture Docs
 
 - [Architecture Overview](./ARCHITECTURE.md)
-- [架构说明](./ARCHITECTURE_ZH.md)
+- [中文架构说明](./ARCHITECTURE_ZH.md)
 
 ## Development
 
