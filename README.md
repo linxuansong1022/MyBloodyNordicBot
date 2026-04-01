@@ -1,6 +1,8 @@
 # MiniCode
 
-[简体中文](./README.zh-CN.md) | [Architecture](./ARCHITECTURE.md) | [License](./LICENSE)
+[![Star History Chart](https://api.star-history.com/image?repos=LiuMengxuan04/MiniCode&type=Date)](https://www.star-history.com/#LiuMengxuan04/MiniCode&Date)
+
+[简体中文](./README.zh-CN.md) | [Architecture](./ARCHITECTURE.md) | [Learn Claude Code Design Through MiniCode](./CLAUDE_CODE_PATTERNS.md) | [License](./LICENSE)
 
 A lightweight terminal coding assistant for local development workflows.
 
@@ -27,8 +29,10 @@ The project is intentionally compact, so the control flow, tool model, and TUI b
 - [Commands](#commands)
 - [Configuration](#configuration)
 - [Skills and MCP Usage](#skills-and-mcp-usage)
+- [Star History](#star-history)
 - [Project Structure](#project-structure)
 - [Architecture Docs](#architecture-docs)
+- [Learn Claude Code Design Through MiniCode](#learn-claude-code-design-through-minicode)
 - [Development](#development)
 
 ## Why MiniCode
@@ -355,6 +359,24 @@ For vendor compatibility, MiniCode automatically tries:
 - then falls back to `newline-json` if needed
 
 That means servers such as MiniMax MCP, which use newline-delimited JSON over stdio, can still be connected directly.
+
+## Star History
+
+This README uses the open source [Star History](https://www.star-history.com/) component to show the GitHub star growth chart. Their official guide recommends using an embeddable image link for GitHub READMEs rather than an iframe. Source:
+
+- https://www.star-history.com/blog/add-a-live-star-history-chart-to-your-github-readme
+
+Current embed snippet:
+
+```md
+[![Star History Chart](https://api.star-history.com/image?repos=LiuMengxuan04/MiniCode&type=Date)](https://www.star-history.com/#LiuMengxuan04/MiniCode&Date)
+```
+
+## Learn Claude Code Design Through MiniCode
+
+If you want to study the project as a learning resource, continue with:
+
+- [What Claude Code Design Ideas You Can Learn Through MiniCode](./CLAUDE_CODE_PATTERNS.md)
 
 ## Project Structure
 

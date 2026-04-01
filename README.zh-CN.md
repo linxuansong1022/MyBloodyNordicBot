@@ -1,6 +1,8 @@
 # MiniCode
 
-[English](./README.md) | [架构说明](./ARCHITECTURE_ZH.md) | [License](./LICENSE)
+[![Star History Chart](https://api.star-history.com/image?repos=LiuMengxuan04/MiniCode&type=Date)](https://www.star-history.com/#LiuMengxuan04/MiniCode&Date)
+
+[English](./README.md) | [架构说明](./ARCHITECTURE_ZH.md) | [通过 MiniCode 学习 Claude Code 设计](./CLAUDE_CODE_PATTERNS_ZH.md) | [License](./LICENSE)
 
 一个面向本地开发工作流的轻量级终端编码助手。
 
@@ -27,8 +29,10 @@ MiniCode 围绕一个实用的 terminal-first agent loop 构建：
 - [命令](#命令)
 - [配置](#配置)
 - [Skills 与 MCP 用法](#skills-与-mcp-用法)
+- [Star 趋势](#star-趋势)
 - [项目结构](#项目结构)
 - [架构文档](#架构文档)
+- [通过 MiniCode 学习 Claude Code 设计](#通过-minicode-学习-claude-code-设计)
 - [开发说明](#开发说明)
 
 ## 为什么选择 MiniCode
@@ -355,6 +359,24 @@ MiniCode 当前主要支持：
 - 失败后回退到 `newline-json`
 
 所以像 MiniMax 这类采用按行 JSON 的 MCP server，也可以直接接入。
+
+## Star 趋势
+
+本项目 README 使用了开源的 [Star History](https://www.star-history.com/) 组件来展示 GitHub star 趋势图。官方说明里推荐对 GitHub README 使用可嵌入的图片链接方式，而不是 iframe。来源：
+
+- https://www.star-history.com/blog/add-a-live-star-history-chart-to-your-github-readme
+
+当前嵌入方式：
+
+```md
+[![Star History Chart](https://api.star-history.com/image?repos=LiuMengxuan04/MiniCode&type=Date)](https://www.star-history.com/#LiuMengxuan04/MiniCode&Date)
+```
+
+## 通过 MiniCode 学习 Claude Code 设计
+
+如果你想把这个项目当成学习材料，可以继续阅读：
+
+- [通过 MiniCode 你可以学习到 Claude Code 的哪些设计](./CLAUDE_CODE_PATTERNS_ZH.md)
 
 ## 项目结构
 
