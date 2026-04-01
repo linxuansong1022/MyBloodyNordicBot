@@ -360,15 +360,7 @@ That means servers such as MiniMax MCP, which use newline-delimited JSON over st
 
 ## Star History
 
-This README uses the open source [Star History](https://www.star-history.com/) component to show the GitHub star growth chart. Their official guide recommends using an embeddable image link for GitHub READMEs rather than an iframe. Source:
-
-- https://www.star-history.com/blog/add-a-live-star-history-chart-to-your-github-readme
-
-Current embed snippet:
-
-```md
 [![Star History Chart](https://api.star-history.com/svg?repos=LiuMengxuan04/MiniCode&type=Date)](https://www.star-history.com/#LiuMengxuan04/MiniCode&Date)
-```
 
 ## Learn Claude Code Design Through MiniCode
 

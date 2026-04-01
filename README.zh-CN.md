@@ -360,15 +360,7 @@ MiniCode 当前主要支持：
 
 ## Star 趋势
 
-本项目 README 使用了开源的 [Star History](https://www.star-history.com/) 组件来展示 GitHub star 趋势图。官方说明里推荐对 GitHub README 使用可嵌入的图片链接方式，而不是 iframe。来源：
-
-- https://www.star-history.com/blog/add-a-live-star-history-chart-to-your-github-readme
-
-当前嵌入方式：
-
-```md
 [![Star History Chart](https://api.star-history.com/svg?repos=LiuMengxuan04/MiniCode&type=Date)](https://www.star-history.com/#LiuMengxuan04/MiniCode&Date)
-```
 
 ## 通过 MiniCode 学习 Claude Code 设计
 
