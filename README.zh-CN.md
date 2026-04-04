@@ -1,5 +1,9 @@
 # MiniCode
 
+<p align="center">
+  <img src="./docs/logo.svg" alt="MiniCode Logo" width="120" />
+</p>
+
 [English](./README.md) | [架构说明](./ARCHITECTURE_ZH.md) | [贡献规范](./CONTRIBUTING_ZH.md) | [路线图](./ROADMAP_ZH.md) | [通过 MiniCode 学习 Claude Code 设计](./CLAUDE_CODE_PATTERNS_ZH.md) | [License](./LICENSE)
 
 一个面向本地开发工作流的轻量级终端编码助手。

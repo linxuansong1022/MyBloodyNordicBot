@@ -1,5 +1,9 @@
 # MiniCode
 
+<p align="center">
+  <img src="./docs/logo.svg" alt="MiniCode Logo" width="120" />
+</p>
+
 [简体中文](./README.zh-CN.md) | [Architecture](./ARCHITECTURE.md) | [Contributing](./CONTRIBUTING.md) | [Roadmap](./ROADMAP.md) | [Learn Claude Code Design Through MiniCode](./CLAUDE_CODE_PATTERNS.md) | [License](./LICENSE)
 
 A lightweight terminal coding assistant for local development workflows.
