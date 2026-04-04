@@ -11,6 +11,8 @@ import { modifyFileTool } from './modify-file.js'
 import { patchFileTool } from './patch-file.js'
 import { readFileTool } from './read-file.js'
 import { runCommandTool } from './run-command.js'
+import { webFetchTool } from './web-fetch.js'
+import { webSearchTool } from './web-search.js'
 import { writeFileTool } from './write-file.js'
 
 export async function createDefaultToolRegistry(args: {
@@ -34,6 +36,8 @@ export async function createDefaultToolRegistry(args: {
     patchFileTool,
     runCommandTool,
     createLoadSkillTool(args.cwd),
+    webFetchTool,
+    webSearchTool,
     ...mcp.tools,
   ], {
     skills,
