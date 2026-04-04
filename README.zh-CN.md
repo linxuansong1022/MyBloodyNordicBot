@@ -1,7 +1,21 @@
 # MiniCode
 
 <p align="center">
-  <img src="./docs/logo.svg" alt="MiniCode Logo" width="120" />
+  <img src="./docs/logo.svg" alt="MiniCode Logo" width="180" />
+</p>
+
+<h2 align="center">MiniCode</h2>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Editor-Minicode-D97757?style=for-the-badge" alt="Editor: Minicode" />
+  <img src="https://img.shields.io/badge/%23minicode-Project-B85C3F?style=for-the-badge" alt="#minicode" />
+  <img src="https://img.shields.io/badge/%23lightweight-Focus-F0EBE1?style=for-the-badge&labelColor=8B8B8B" alt="#lightweight" />
+</p>
+
+---
+
+<p align="center">
+  一个轻量且高效的编码工具。为速度而生，为简洁而建。
 </p>
 
 [English](./README.md) | [架构说明](./ARCHITECTURE_ZH.md) | [贡献规范](./CONTRIBUTING_ZH.md) | [路线图](./ROADMAP_ZH.md) | [通过 MiniCode 学习 Claude Code 设计](./CLAUDE_CODE_PATTERNS_ZH.md) | [License](./LICENSE)
