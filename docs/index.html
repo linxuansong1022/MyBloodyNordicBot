@@ -3,382 +3,689 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MiniCode | 产品介绍</title>
+    <title>MiniCode | 终端编码助手产品介绍</title>
     <meta
       name="description"
-      content="MiniCode 是一个轻量、terminal-first 的本地编码助手，支持工具调用、审阅后写入、Skills 与 MCP 扩展。"
+      content="MiniCode 是一个面向本地开发工作流的轻量终端编码助手，强调 model-tool-loop、安全审批、Skills 与 MCP 扩展能力。"
     />
     <style>
       @import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Noto+Sans+SC:wght@400;500;700&display=swap");
 
       :root {
-        --bg: #f7f4ee;
-        --ink: #161616;
-        --muted: #5f5f5f;
-        --card: rgba(255, 255, 255, 0.78);
-        --accent: #ff5a36;
-        --accent-2: #1c8a6b;
-        --line: rgba(22, 22, 22, 0.12);
+        --bg: #efe8db;
+        --bg-2: #f8f4ec;
+        --ink: #141414;
+        --muted: #5a5a5a;
+        --line: rgba(20, 20, 20, 0.14);
+        --card: rgba(255, 255, 255, 0.8);
+        --accent: #e5532c;
+        --accent-2: #1a8969;
+        --accent-3: #1f63c9;
+        --radius: 18px;
       }
 
       * {
         box-sizing: border-box;
       }
 
+      html {
+        scroll-behavior: smooth;
+      }
+
       body {
         margin: 0;
         color: var(--ink);
-        background:
-          radial-gradient(circle at 10% -10%, #ffd9b7 0%, transparent 35%),
-          radial-gradient(circle at 90% 10%, #d5f4ea 0%, transparent 30%),
-          linear-gradient(160deg, #f7f4ee 0%, #f1ebdf 100%);
         font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
         line-height: 1.6;
+        background:
+          radial-gradient(circle at 12% -15%, #ffd5b4 0%, transparent 35%),
+          radial-gradient(circle at 88% 8%, #d4f0e6 0%, transparent 30%),
+          linear-gradient(155deg, var(--bg) 0%, var(--bg-2) 100%);
       }
 
-      .wrap {
-        max-width: 1120px;
+      .container {
+        max-width: 1140px;
         margin: 0 auto;
-        padding: 24px;
+        padding: 22px;
       }
 
-      .nav {
+      .topbar {
         display: flex;
-        justify-content: space-between;
+        gap: 14px;
         align-items: center;
-        margin-bottom: 36px;
+        justify-content: space-between;
+        margin-bottom: 18px;
       }
 
       .brand {
         font-family: "Space Grotesk", sans-serif;
-        font-size: 1.4rem;
+        font-size: 1.42rem;
+        font-weight: 700;
         letter-spacing: 0.02em;
       }
 
       .badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        border: 1px solid var(--line);
+        font-size: 0.82rem;
+        padding: 5px 10px;
         border-radius: 999px;
-        padding: 6px 12px;
+        border: 1px solid var(--line);
         color: var(--muted);
-        background: rgba(255, 255, 255, 0.65);
-        font-size: 0.85rem;
+        background: rgba(255, 255, 255, 0.66);
+      }
+
+      .quick-nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 22px;
+      }
+
+      .quick-nav a {
+        text-decoration: none;
+        color: var(--ink);
+        font-size: 0.9rem;
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.56);
+        border-radius: 999px;
+        padding: 7px 12px;
+      }
+
+      .quick-nav a:hover {
+        border-color: var(--ink);
       }
 
       .hero {
+        border: 1px solid rgba(255, 255, 255, 0.45);
+        border-radius: 28px;
         background: var(--card);
         backdrop-filter: blur(4px);
-        border: 1px solid rgba(255, 255, 255, 0.4);
-        border-radius: 26px;
-        padding: 52px 42px;
-        box-shadow: 0 20px 50px rgba(30, 20, 10, 0.08);
-        animation: rise 900ms ease both;
+        padding: 46px 34px;
+        box-shadow: 0 24px 54px rgba(31, 18, 8, 0.08);
       }
 
-      .hero h1 {
-        margin: 0 0 16px;
+      h1,
+      h2,
+      h3 {
+        margin: 0;
+      }
+
+      h1 {
         font-family: "Space Grotesk", sans-serif;
-        font-size: clamp(2.2rem, 5vw, 4rem);
+        font-size: clamp(2.1rem, 5vw, 3.9rem);
         line-height: 1.05;
+        margin-bottom: 16px;
       }
 
       .hero p {
-        max-width: 760px;
         margin: 0;
-        font-size: 1.08rem;
-        color: #2f2f2f;
+        max-width: 820px;
+        font-size: 1.05rem;
       }
 
       .hero-actions {
-        margin-top: 28px;
+        margin-top: 24px;
         display: flex;
         flex-wrap: wrap;
-        gap: 12px;
+        gap: 10px;
       }
 
       .btn {
-        border: 1px solid transparent;
-        border-radius: 14px;
-        padding: 12px 18px;
         text-decoration: none;
-        font-weight: 600;
-        transition: 220ms ease;
+        border-radius: 14px;
+        padding: 11px 16px;
+        font-weight: 700;
+        border: 1px solid transparent;
       }
 
       .btn-primary {
-        background: var(--ink);
+        background: #111;
         color: #fff;
       }
 
-      .btn-primary:hover {
-        background: #000;
-        transform: translateY(-2px);
-      }
-
-      .btn-ghost {
+      .btn-secondary {
         border-color: var(--line);
-        color: var(--ink);
-        background: rgba(255, 255, 255, 0.65);
+        color: #111;
+        background: rgba(255, 255, 255, 0.6);
       }
 
-      .btn-ghost:hover {
-        border-color: var(--ink);
-        transform: translateY(-2px);
-      }
-
-      .stats {
-        margin-top: 34px;
+      .facts {
+        margin-top: 24px;
         display: grid;
+        gap: 12px;
         grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 14px;
       }
 
-      .stat {
+      .fact {
+        background: rgba(255, 255, 255, 0.66);
         border: 1px solid var(--line);
-        border-radius: 16px;
-        background: rgba(255, 255, 255, 0.65);
-        padding: 14px;
+        border-radius: 14px;
+        padding: 12px;
       }
 
-      .stat strong {
+      .fact strong {
         display: block;
         font-family: "Space Grotesk", sans-serif;
-        font-size: 1.4rem;
+        font-size: 1.25rem;
       }
 
       section {
-        margin-top: 52px;
+        margin-top: 54px;
       }
 
-      h2 {
+      section h2 {
         font-family: "Space Grotesk", sans-serif;
-        margin: 0 0 14px;
-        font-size: clamp(1.6rem, 3vw, 2.2rem);
+        font-size: clamp(1.55rem, 3vw, 2.15rem);
+        margin-bottom: 10px;
       }
 
-      .section-intro {
-        margin: 0 0 20px;
+      .intro {
+        margin: 0 0 18px;
         color: var(--muted);
       }
 
-      .grid {
+      .grid-3 {
         display: grid;
+        gap: 14px;
         grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 16px;
+      }
+
+      .grid-2 {
+        display: grid;
+        gap: 14px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
       .card {
         border: 1px solid var(--line);
-        border-radius: 18px;
-        padding: 22px;
+        border-radius: var(--radius);
         background: var(--card);
-        backdrop-filter: blur(3px);
-        box-shadow: 0 8px 22px rgba(30, 20, 10, 0.05);
+        padding: 18px;
       }
 
       .card h3 {
-        margin: 0 0 10px;
-        font-size: 1.08rem;
+        margin-bottom: 8px;
+        font-size: 1.03rem;
       }
 
       .card p {
         margin: 0;
-        color: #343434;
       }
 
-      .workflow {
+      .list {
+        margin: 0;
+        padding-left: 18px;
+      }
+
+      .list li + li {
+        margin-top: 4px;
+      }
+
+      .tools-wrap {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .tool {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+        font-size: 0.86rem;
+        padding: 6px 10px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.7);
+      }
+
+      .steps {
         display: grid;
-        gap: 12px;
+        gap: 10px;
       }
 
       .step {
         border-left: 4px solid var(--accent);
-        padding: 12px 16px;
-        background: rgba(255, 255, 255, 0.75);
+        padding: 10px 13px;
         border-radius: 12px;
+        background: rgba(255, 255, 255, 0.73);
       }
 
       .step:nth-child(2) {
-        border-left-color: #ff944d;
+        border-left-color: #f28f3d;
       }
 
       .step:nth-child(3) {
-        border-left-color: #1c8a6b;
+        border-left-color: var(--accent-2);
       }
 
       .step:nth-child(4) {
-        border-left-color: #4677ff;
+        border-left-color: var(--accent-3);
       }
 
-      .cta {
-        margin-top: 56px;
+      .code {
+        margin: 10px 0 0;
+        background: #141414;
+        color: #f6f6f6;
+        border-radius: 12px;
+        padding: 12px;
+        overflow: auto;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+        font-size: 0.84rem;
+      }
+
+      .roadmap {
+        display: grid;
+        gap: 12px;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .tier {
         border: 1px solid var(--line);
-        border-radius: 20px;
-        padding: 24px;
-        background: linear-gradient(120deg, rgba(255, 90, 54, 0.08), rgba(28, 138, 107, 0.08));
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 14px;
+        border-radius: 16px;
+        padding: 16px;
+        background: var(--card);
       }
 
-      .cta p {
-        margin: 0;
-        color: #343434;
+      .tier h3 {
+        margin-bottom: 8px;
       }
 
-      footer {
-        margin: 44px 0 20px;
+      .tier.p0 h3 {
+        color: #b63a1f;
+      }
+
+      .tier.p1 h3 {
+        color: #116c53;
+      }
+
+      .tier.p2 h3 {
+        color: #1f4faa;
+      }
+
+      .links {
+        display: grid;
+        gap: 10px;
+      }
+
+      .links a {
+        color: #083470;
+        text-decoration: none;
+      }
+
+      .star {
+        margin-top: 14px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        overflow: hidden;
+        background: #fff;
+      }
+
+      .star img {
+        width: 100%;
+        display: block;
+      }
+
+      .footer {
+        margin: 42px 0 12px;
+        font-size: 0.9rem;
         color: var(--muted);
-        font-size: 0.92rem;
       }
 
-      @media (max-width: 900px) {
-        .stats {
+      @media (max-width: 960px) {
+        .facts {
           grid-template-columns: repeat(2, minmax(0, 1fr));
         }
 
-        .grid {
+        .grid-3,
+        .roadmap {
           grid-template-columns: 1fr;
         }
 
-        .cta {
-          flex-direction: column;
-          align-items: flex-start;
+        .grid-2 {
+          grid-template-columns: 1fr;
         }
       }
 
-      @media (max-width: 560px) {
+      @media (max-width: 620px) {
         .hero {
-          padding: 34px 22px;
+          padding: 34px 20px;
         }
 
-        .stats {
+        .facts {
           grid-template-columns: 1fr;
-        }
-      }
-
-      @keyframes rise {
-        from {
-          opacity: 0;
-          transform: translateY(16px);
-        }
-
-        to {
-          opacity: 1;
-          transform: translateY(0);
         }
       }
     </style>
   </head>
   <body>
-    <div class="wrap">
-      <div class="nav">
+    <main class="container">
+      <div class="topbar">
         <div class="brand">MiniCode</div>
-        <span class="badge">terminal-first coding assistant</span>
+        <span class="badge">Lightweight Claude Code-style Runtime</span>
       </div>
 
+      <nav class="quick-nav">
+        <a href="#features">功能特性</a>
+        <a href="#tools">工具列表</a>
+        <a href="#commands">命令与配置</a>
+        <a href="#architecture">架构设计</a>
+        <a href="#roadmap">路线图</a>
+        <a href="#contrib">贡献方式</a>
+        <a href="#resources">文档资源</a>
+      </nav>
+
       <header class="hero">
-        <h1>用更小体量，跑通完整 AI 编码工作流</h1>
+        <h1>把终端 AI 编码助手做“小”，但把主闭环做“全”</h1>
         <p>
-          MiniCode 是一个面向本地开发的轻量级终端编码助手。它保留了 model-tool
-          闭环、审批式文件修改、可扩展工具协议等关键能力，同时保持代码结构清晰，适合学习、改造与二次开发。
+          MiniCode 是一个面向本地开发工作流的轻量终端编码助手。它专注保留最关键的执行路径：
+          <strong>model -> tool -> model</strong> 主循环、可审阅的文件修改流程、权限审批边界、可扩展的 Skills 与 MCP。
+          相比重型平台，MiniCode 更适合作为学习样本、实验底座和二次开发起点。
         </p>
         <div class="hero-actions">
-          <a class="btn btn-primary" href="https://github.com/LiuMengxuan04/MiniCode/blob/main/README.zh-CN.md">查看中文文档</a>
-          <a class="btn btn-ghost" href="https://github.com/LiuMengxuan04/MiniCode/blob/main/README.md">Read in English</a>
+          <a class="btn btn-primary" href="https://github.com/LiuMengxuan04/MiniCode">访问 GitHub 仓库</a>
+          <a class="btn btn-secondary" href="https://github.com/LiuMengxuan04/MiniCode/blob/main/README.zh-CN.md">阅读中文 README</a>
+          <a class="btn btn-secondary" href="https://github.com/LiuMengxuan04/MiniCode/blob/main/README.md">Read README (EN)</a>
         </div>
-        <div class="stats">
-          <div class="stat">
+        <div class="facts">
+          <div class="fact">
             <strong>13+</strong>
-            内置工具
+            内置工具（含 MCP helper）
           </div>
-          <div class="stat">
-            <strong>1 个</strong>
-            主 agent loop
+          <div class="fact">
+            <strong>Terminal-first</strong>
+            全屏 TUI 与会话 transcript
           </div>
-          <div class="stat">
-            <strong>终端优先</strong>
-            全流程交互
+          <div class="fact">
+            <strong>Review-before-write</strong>
+            写入前统一 diff 审批
           </div>
-          <div class="stat">
-            <strong>可扩展</strong>
-            Skills + MCP
+          <div class="fact">
+            <strong>Skills + MCP</strong>
+            本地工作流与外部能力扩展
           </div>
         </div>
       </header>
 
-      <section>
-        <h2>核心能力</h2>
-        <p class="section-intro">围绕真实开发场景设计，而不是只做聊天窗口。</p>
-        <div class="grid">
+      <section id="features">
+        <h2>功能特性（基于项目文档整理）</h2>
+        <p class="intro">从 README、ARCHITECTURE 与 PATTERNS 文档提炼的核心能力与设计方向。</p>
+        <div class="grid-3">
           <article class="card">
-            <h3>多步工具执行</h3>
-            <p>在单轮中串联 list/read/edit/run 等操作，完成从理解到落地的完整闭环。</p>
+            <h3>核心工作流</h3>
+            <ul class="list">
+              <li>单轮支持多步工具执行</li>
+              <li>模型与工具闭环：model -> tool -> model</li>
+              <li>全屏终端交互、输入历史与 transcript 滚动</li>
+              <li>progress 状态与 final 回复分离建模</li>
+            </ul>
           </article>
           <article class="card">
-            <h3>审批后写入</h3>
-            <p>文件改动先展示 unified diff，再决定是否落盘，控制力与安全性并存。</p>
+            <h3>安全与可控</h3>
+            <ul class="list">
+              <li>文件修改前统一展示 unified diff</li>
+              <li>路径权限与命令权限检查</li>
+              <li>命令执行与编辑审批在主执行路径内</li>
+              <li>支持拒绝并向模型反馈修正建议</li>
+            </ul>
           </article>
           <article class="card">
-            <h3>终端体验优化</h3>
-            <p>支持 transcript 滚动、输入历史、slash 菜单、审批反馈，交互流畅且可追溯。</p>
+            <h3>扩展能力</h3>
+            <ul class="list">
+              <li>本地 SKILL.md 发现与 load_skill</li>
+              <li>stdio MCP server 动态接入</li>
+              <li>MCP tools/resources/prompts 通用访问</li>
+              <li>兼容 Content-Length / newline-json framing</li>
+            </ul>
           </article>
-          <article class="card">
-            <h3>Skills 发现</h3>
-            <p>通过 `SKILL.md` 自动发现本地技能，让能力模块化、可复用、可共享。</p>
-          </article>
-          <article class="card">
-            <h3>MCP 工具接入</h3>
-            <p>支持通过 stdio 动态加载 MCP 服务，并可读取 resources 与 prompts。</p>
-          </article>
-          <article class="card">
-            <h3>兼容 Anthropic 风格接口</h3>
-            <p>保留通用配置方式，适应不同模型与环境，便于本地和团队统一部署。</p>
-          </article>
+        </div>
+      </section>
+
+      <section id="tools">
+        <h2>内置工具清单</h2>
+        <p class="intro">本地工具和 MCP helper 工具走统一协议与注册入口。</p>
+        <div class="card">
+          <div class="tools-wrap">
+            <span class="tool">list_files</span>
+            <span class="tool">grep_files</span>
+            <span class="tool">read_file</span>
+            <span class="tool">write_file</span>
+            <span class="tool">edit_file</span>
+            <span class="tool">patch_file</span>
+            <span class="tool">modify_file</span>
+            <span class="tool">run_command</span>
+            <span class="tool">load_skill</span>
+            <span class="tool">list_mcp_resources</span>
+            <span class="tool">read_mcp_resource</span>
+            <span class="tool">list_mcp_prompts</span>
+            <span class="tool">get_mcp_prompt</span>
+          </div>
         </div>
       </section>
 
       <section>
-        <h2>工作流一眼看懂</h2>
-        <p class="section-intro">MiniCode 的核心是一个清晰、可解释、可扩展的 agent loop。</p>
-        <div class="workflow">
-          <div class="step"><strong>1.</strong> 接收用户需求并解析目标</div>
-          <div class="step"><strong>2.</strong> 检查工作区并按需调用工具</div>
-          <div class="step"><strong>3.</strong> 输出变更 diff 并等待审批</div>
-          <div class="step"><strong>4.</strong> 执行写入并在同一终端返回结果</div>
+        <h2>一轮任务如何执行</h2>
+        <p class="intro">把权限与审阅放进执行链路，而不是后置补丁。</p>
+        <div class="steps">
+          <div class="step"><strong>1.</strong> 接收用户请求并组织当前上下文</div>
+          <div class="step"><strong>2.</strong> 模型决定是否调用工具并执行</div>
+          <div class="step"><strong>3.</strong> 工具结果回传模型继续推理</div>
+          <div class="step"><strong>4.</strong> 涉及写入时先 review diff，经审批后落盘</div>
+        </div>
+      </section>
+
+      <section id="commands">
+        <h2>命令与配置速览</h2>
+        <div class="grid-2">
+          <article class="card">
+            <h3>管理命令（CLI）</h3>
+            <ul class="list">
+              <li><code>minicode mcp list</code></li>
+              <li><code>minicode mcp add &lt;name&gt; ...</code></li>
+              <li><code>minicode mcp remove &lt;name&gt; ...</code></li>
+              <li><code>minicode skills list</code></li>
+              <li><code>minicode skills add &lt;path&gt; ...</code></li>
+              <li><code>minicode skills remove &lt;name&gt; ...</code></li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>交互内 slash 命令</h3>
+            <ul class="list">
+              <li><code>/help</code> / <code>/tools</code> / <code>/skills</code> / <code>/mcp</code></li>
+              <li><code>/status</code> / <code>/model</code> / <code>/model &lt;name&gt;</code></li>
+              <li><code>/config-paths</code></li>
+            </ul>
+            <div class="code">cd mini-code
+npm install
+npm run install-local
+minicode</div>
+          </article>
+        </div>
+        <div class="grid-2" style="margin-top: 14px;">
+          <article class="card">
+            <h3>配置优先级</h3>
+            <ol class="list">
+              <li><code>~/.mini-code/settings.json</code></li>
+              <li><code>~/.mini-code/mcp.json</code></li>
+              <li>项目级 <code>.mcp.json</code></li>
+              <li>兼容的本地已有配置</li>
+              <li>当前进程环境变量</li>
+            </ol>
+          </article>
+          <article class="card">
+            <h3>Skills 默认发现路径</h3>
+            <ul class="list">
+              <li><code>./.mini-code/skills/&lt;skill-name&gt;/SKILL.md</code></li>
+              <li><code>~/.mini-code/skills/&lt;skill-name&gt;/SKILL.md</code></li>
+              <li><code>./.claude/skills/&lt;skill-name&gt;/SKILL.md</code></li>
+              <li><code>~/.claude/skills/&lt;skill-name&gt;/SKILL.md</code></li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section id="architecture">
+        <h2>架构地图（当前实现）</h2>
+        <p class="intro">MiniCode 不是“大而全”，而是围绕主 loop 与边界能力做结构化裁剪。</p>
+        <div class="grid-3">
+          <article class="card">
+            <h3><code>src/index.ts</code></h3>
+            <p>CLI 入口，负责启动会话与主流程。</p>
+          </article>
+          <article class="card">
+            <h3><code>src/agent-loop.ts</code></h3>
+            <p>多步模型/工具循环，驱动主要执行闭环。</p>
+          </article>
+          <article class="card">
+            <h3><code>src/tool.ts</code></h3>
+            <p>工具注册、参数校验、执行入口与结果归一。</p>
+          </article>
+          <article class="card">
+            <h3><code>src/mcp.ts</code></h3>
+            <p>stdio MCP 连接、协议协商、远端工具封装。</p>
+          </article>
+          <article class="card">
+            <h3><code>src/skills.ts</code></h3>
+            <p>本地 skills 扫描、发现与加载。</p>
+          </article>
+          <article class="card">
+            <h3><code>src/permissions.ts</code> + <code>src/file-review.ts</code></h3>
+            <p>路径/命令/编辑审批与写入前 diff review。</p>
+          </article>
+          <article class="card">
+            <h3><code>src/background-tasks.ts</code></h3>
+            <p>后台 shell task 最小注册表，区分前台工具与后台任务。</p>
+          </article>
+          <article class="card">
+            <h3><code>src/tui/*</code></h3>
+            <p>transcript、input、markdown、screen 等终端 UI 组件。</p>
+          </article>
+          <article class="card">
+            <h3><code>src/manage-cli.ts</code> + <code>src/config.ts</code></h3>
+            <p>MCP/skills 管理命令与运行时配置加载。</p>
+          </article>
         </div>
       </section>
 
       <section>
-        <h2>适合谁用</h2>
-        <div class="grid">
+        <h2>通过 MiniCode 可学习的 Claude Code 风格设计</h2>
+        <div class="grid-3">
           <article class="card">
-            <h3>学习者</h3>
-            <p>想理解 Claude Code 类架构，但不希望从复杂工程入手。</p>
+            <h3>Loop-first 主结构</h3>
+            <p>把 UI、工具、权限、扩展能力都围绕同一 agent loop 组织。</p>
           </article>
           <article class="card">
-            <h3>研发团队</h3>
-            <p>需要可控、可审阅、可扩展的本地 AI 编码流程。</p>
+            <h3>结构化消息模型</h3>
+            <p>区分 assistant/progress/tool-call/tool-result/context-summary 等状态。</p>
           </article>
           <article class="card">
-            <h3>工具开发者</h3>
-            <p>希望在现有 agent loop 基础上快速加工具、改交互、做实验。</p>
+            <h3>Tool Use 协议化</h3>
+            <p>模型声明、系统校验、统一执行、结果标准化回流。</p>
+          </article>
+          <article class="card">
+            <h3>权限在执行路径内</h3>
+            <p>危险行为通过审批与 review 进入主循环，而非旁路处理。</p>
+          </article>
+          <article class="card">
+            <h3>MCP 动态能力接入</h3>
+            <p>tools/resources/prompts 在会话期动态挂载。</p>
+          </article>
+          <article class="card">
+            <h3>前台工具 vs 后台 shell task</h3>
+            <p>长时命令与普通同步工具区分建模，避免伪装成“永远 running”。</p>
           </article>
         </div>
       </section>
 
-      <section class="cta">
-        <div>
-          <h2>3 分钟开始体验</h2>
-          <p>安装依赖后运行 `npm run install-local`，再执行 `minicode` 即可进入终端工作流。</p>
+      <section id="roadmap">
+        <h2>路线图优先级</h2>
+        <p class="intro">以下内容来自项目 ROADMAP，按 P0/P1/P2 展示。</p>
+        <div class="roadmap">
+          <article class="tier p0">
+            <h3>P0（优先补齐）</h3>
+            <ul class="list">
+              <li>模型感知上下文管理与压缩</li>
+              <li>API retry / backoff / Retry-After</li>
+              <li>会话持久化与恢复</li>
+              <li>Python / Go / Rust 多语言实现分支探索</li>
+            </ul>
+          </article>
+          <article class="tier p1">
+            <h3>P1（稳定后推进）</h3>
+            <ul class="list">
+              <li>分层 memory 加载</li>
+              <li>更完整 provider abstraction</li>
+              <li>轻量 Todo/task tracking</li>
+              <li><code>.claude/agents</code> 与 sub-agent 支持</li>
+              <li>有选择地扩充核心工具集</li>
+            </ul>
+          </article>
+          <article class="tier p2">
+            <h3>P2（中长期）</h3>
+            <ul class="list">
+              <li>Notebook 编辑支持</li>
+              <li>内置 WebFetch / WebSearch 工具</li>
+              <li>评测与 trace 基建</li>
+              <li>Prompt caching</li>
+            </ul>
+          </article>
         </div>
-        <a class="btn btn-primary" href="https://github.com/LiuMengxuan04/MiniCode/blob/main/README.zh-CN.md">查看安装步骤</a>
       </section>
 
-      <footer>MiniCode Product Page · Built for terminal-native builders.</footer>
-    </div>
+      <section id="contrib">
+        <h2>贡献方式（Contributor Friendly）</h2>
+        <p class="intro">项目欢迎 PR，但强调轻量、可读、可 review 与方向一致性。</p>
+        <div class="grid-2">
+          <article class="card">
+            <h3>贡献原则</h3>
+            <ul class="list">
+              <li>优先小步、聚焦型 PR，避免大重构</li>
+              <li>保持与 Claude Code 设计方向趋同</li>
+              <li>不随意削弱安全边界（审批/权限/review）</li>
+              <li>可读性优先于“技巧化”实现</li>
+              <li>谨慎新增依赖，保持项目轻量</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>提交前检查</h3>
+            <ul class="list">
+              <li>行为改动同步更新文档</li>
+              <li>先看 issue，避免重复开发</li>
+              <li>本地执行 <code>npm run check</code></li>
+              <li>PR 描述清楚改动内容、原因和验证方式</li>
+            </ul>
+            <div class="code">npm run check</div>
+          </article>
+        </div>
+      </section>
+
+      <section id="resources">
+        <h2>文档与资源</h2>
+        <div class="grid-2">
+          <article class="card">
+            <div class="links">
+              <a href="https://github.com/LiuMengxuan04/MiniCode">GitHub Repository</a>
+              <a href="https://github.com/LiuMengxuan04/MiniCode/blob/main/README.zh-CN.md">README.zh-CN</a>
+              <a href="https://github.com/LiuMengxuan04/MiniCode/blob/main/README.md">README</a>
+              <a href="https://github.com/LiuMengxuan04/MiniCode/blob/main/ARCHITECTURE_ZH.md">ARCHITECTURE_ZH</a>
+              <a href="https://github.com/LiuMengxuan04/MiniCode/blob/main/ARCHITECTURE.md">ARCHITECTURE</a>
+              <a href="https://github.com/LiuMengxuan04/MiniCode/blob/main/ROADMAP_ZH.md">ROADMAP_ZH</a>
+              <a href="https://github.com/LiuMengxuan04/MiniCode/blob/main/ROADMAP.md">ROADMAP</a>
+              <a href="https://github.com/LiuMengxuan04/MiniCode/blob/main/CONTRIBUTING_ZH.md">CONTRIBUTING_ZH</a>
+              <a href="https://github.com/LiuMengxuan04/MiniCode/blob/main/CONTRIBUTING.md">CONTRIBUTING</a>
+              <a href="https://github.com/LiuMengxuan04/MiniCode/blob/main/CLAUDE_CODE_PATTERNS_ZH.md">CLAUDE_CODE_PATTERNS_ZH</a>
+              <a href="https://github.com/LiuMengxuan04/MiniCode/blob/main/CLAUDE_CODE_PATTERNS.md">CLAUDE_CODE_PATTERNS</a>
+            </div>
+          </article>
+          <article class="card">
+            <h3>Star 趋势</h3>
+            <p>用于观察项目关注度变化（来自公开 Star History 图）。</p>
+            <div class="star">
+              <a href="https://www.star-history.com/#LiuMengxuan04/MiniCode&Date">
+                <img alt="MiniCode Star History" src="https://api.star-history.com/image?repos=LiuMengxuan04/MiniCode&style=landscape1" />
+              </a>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <p class="footer">MiniCode Product Page for GitHub Pages · docs/index.html · Maintained with project docs in sync.</p>
+    </main>
   </body>
 </html>
