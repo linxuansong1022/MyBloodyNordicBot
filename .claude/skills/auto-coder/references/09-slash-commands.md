@@ -15,6 +15,7 @@
 | `/permissions` | 显示权限存储路径 |
 | `/cost` | 显示当前 session 的 token 用量与估算成本 |
 | `/cost reset` | 重置 session token 计数器 |
+| `/clear` | 清空当前对话历史，保留 system prompt（相当于"让 agent 忘掉之前的对话"） |
 | `/exit` | 退出 |
 
 **工具快捷命令（直接调用工具，跳过 LLM）：**
@@ -29,3 +30,5 @@
 | `/edit <path>::<search>::<replace>` | `edit_file` |
 | `/patch <path>::<s1>::<r1>::<s2>::<r2>` | `patch_file` |
 | `/cmd [cwd::]<command> [args]` | `run_command` |
+
+---

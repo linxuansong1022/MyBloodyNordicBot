@@ -199,7 +199,13 @@ async function main(): Promise<void> {
         }
 
         // 尝试匹配其他内置命令
-        const localCommandResult = await tryHandleLocalCommand(input, { tools })
+        const localCommandResult = await tryHandleLocalCommand(input, {
+          tools,
+          clearMessages: () => {
+            // 只保留 system prompt，让 agent "忘掉" 之前的对话
+            messages = [messages[0]]
+          },
+        })
         if (localCommandResult !== null) {
           console.log(`\n${localCommandResult}\n`)
           continue

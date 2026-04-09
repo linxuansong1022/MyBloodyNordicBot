@@ -72,6 +72,11 @@ export const SLASH_COMMANDS: SlashCommand[] = [
     description: 'Reset session token usage counter.',
   },
   {
+    name: '/clear',
+    usage: '/clear',
+    description: 'Clear conversation history (keep system prompt).',
+  },
+  {
     name: '/exit',
     usage: '/exit',
     description: 'Exit mini-code.',
@@ -181,6 +186,7 @@ export async function tryHandleLocalCommand(
   input: string,
   context?: {
     tools?: ToolRegistry
+    clearMessages?: () => void
   },
 ): Promise<string | null> {
   if (input === '/') {
@@ -211,6 +217,14 @@ export async function tryHandleLocalCommand(
   if (input === '/cost reset') {
     resetUsage()
     return 'Session token usage counter reset.'
+  }
+
+  if (input === '/clear') {
+    if (!context?.clearMessages) {
+      return '/clear not wired into this runtime mode.'
+    }
+    context.clearMessages()
+    return 'Conversation cleared. System prompt retained.'
   }
 
   if (input === '/skills') {

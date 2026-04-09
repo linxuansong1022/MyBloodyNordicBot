@@ -587,6 +587,11 @@ async function handleInput(
 
   const localCommandResult = await tryHandleLocalCommand(input, {
     tools: args.tools,
+    clearMessages: () => {
+      // 原地 truncate 到只剩 system prompt（index 0），匹配 tty-app 的 mutable 风格
+      // 参考 tty-app.ts 现有的 `args.messages.length = 0` 用法
+      args.messages.length = 1
+    },
   })
   if (localCommandResult !== null) {
     pushTranscriptEntry(state, {
