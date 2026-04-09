@@ -34,6 +34,7 @@ NUMBER_SLUG_MAP = {
     7: "config-reference",     # 配置文件速查
     8: "launch-commands",      # 启动命令
     9: "slash-commands",       # Slash 命令一览
+    10: "eval-strategy",       # 测试与评估策略
 }
 
 
